@@ -1,5 +1,7 @@
 package test;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.junit.Assert;
@@ -71,7 +73,13 @@ public class TestDBManager {
 		}
 
 		@Override
-		public ArrayList select(String strSQL) {
+		public ArrayList select(String column, String operator, String value) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		protected Object mapDbToObject(ResultSet resultSet2) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}		

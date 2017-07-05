@@ -1,17 +1,19 @@
 package dao;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+
 
 import model.Comments;
 
-public class DBMComents extends DBManager<Comments>{
+public class DBMComments extends DBManager<Comments>{
 
-	public DBMComents(String dbHost, String dbName, String dbTable) {
+	public DBMComments(String dbHost, String dbName, String dbTable) {
 		super(dbHost, dbName, dbTable);
 	}
 
@@ -50,16 +52,15 @@ public class DBMComents extends DBManager<Comments>{
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
-		}
-		
-		object.setId(lastInsertId);
-		
+		}		
+		object.setId(lastInsertId);		
 		return object;
 	}
 
 	
 	/**
-	 * 
+	 * "UPDATE tabla set myuser = ?  where id = ?";
+	 * @throws SQLException 
 	 */
 	@Override
 	public void update(Comments object) throws SQLException {
@@ -95,88 +96,42 @@ public class DBMComents extends DBManager<Comments>{
 		
 	}
 	
+		
+
+	@Override
+	protected Comments mapDbToObject(ResultSet resultSet2) throws SQLException {
+		// lee el resultado i
+		int id = resultSet.getInt("id");
+		String user = resultSet.getString("myuser");
+		String email = resultSet.getString("email");
+		String webpage = resultSet.getString("webpage");
+		String summary = resultSet.getString("summary");
+		Date date = resultSet.getDate("datum");
+		String comments = resultSet.getString("comments");
+
+		Comments comment = new Comments();
+
+		comment.setId(id);
+		comment.setEmail(email);
+		comment.setDatum(date);
+		comment.setMyUser(user);
+		comment.setSummary(summary);
+		comment.setComments(comments);
+		comment.setWebpage(webpage);
+		return comment;
+	}
+	
+	
 	
 	/**
 	 * Condiciones bajo las cuales se puede actualizar un objeto.
 	 * @param object
 	 */
-	private static void ckeckFormatUpdate(Comments object) {
-				
+	private static void ckeckFormatUpdate(Comments object) {		
 		if(object.getId()<=-1){
 			throw new RuntimeException("El objeto que trata de actualizar no tiene un id válido");
-		}
-		
-		
-		
+		}		
 	}
-
-	@Override
-	public Comments select(int id) throws SQLException{
-		
-		String strSql = "SELECT * FROM "+ getDbTable() + " WHERE id=?";	
-		PreparedStatement preparedStatement =null;
-		Comments comment = null;
-		
-		try {		
-			preparedStatement = getConnected().prepareStatement(strSql);						
-			preparedStatement.setInt(1, id);
-			ResultSet resultSet = preparedStatement.executeQuery();
-			ArrayList<Comments> list = resultSetToComments(resultSet);
-			comment = list.get(0);
-		} catch (SQLException e) {
-			close();
-			throw e;
-		}
-		
-		
-		return comment;
-	}
-
-	private ArrayList<Comments> resultSetToComments(ResultSet resultSet) throws SQLException {
-
-		ArrayList<Comments> list = new ArrayList<Comments>();
-		
-			while (resultSet.next()) {
-				HashMap<String, String> hashMap = new HashMap<String, String>();
-				int id = resultSet.getInt("id");
-				String user = resultSet.getString("myuser");
-				String email = resultSet.getString("email");
-				String webpage = resultSet.getString("webpage");
-				String summary = resultSet.getString("summary");
-				java.sql.Date date = resultSet.getDate("datum");
-				String comments = resultSet.getString("comments");
-				
-				Comments comment = new Comments();
-				comment.setId(id);
-				comment.setMyUser(user);
-				comment.setEmail(email);
-				comment.setWebpage(webpage);
-				comment.setSummary(summary);
-				comment.setDatum(date);
-				comment.setComments(comments);
-				
-				list.add(comment);
-			}
-		return list;
-
-	}
-	
-	
-	
-	
-	
-	@Override
-	public ArrayList<Comments> select(String strSQL) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void close() {
-		// TODO Auto-generated method stub
-		super.close();		
-	}
-
 	
 	
 	
