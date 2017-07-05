@@ -5,13 +5,30 @@ import java.util.ArrayList;
 
 import org.junit.Assert;
 
+import org.junit.Test;
+
+
 import dao.DBMComments;
 import model.Comments;
+
+/**   OPCINAL 
+ *Ejecutar en orden los TEST esto es opcional 
+ * y las firmar de los metodos se renombrar por orden alfabeticamente 
+ * ej.  atestInsert() ... btestUpdate() ... ctestGet()
+ * 
+ * Esto se debe colocar en la CLASE "public class TestDBMComments {"
+ *  @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+ *  
+ *  y se importan:
+ *  
+ *  import org.junit.FixMethodOrder;
+ *  import org.junit.runners.MethodSorters;
+ */
 
 public class TestDBMComments {
 
 	
-	//@Test
+	@Test 
 	public void testInsert() {
 		boolean result = true;
 		DBMComments dbManager = new DBMComments("localhost", "dbtest","comments");
@@ -36,7 +53,7 @@ public class TestDBMComments {
 	
 	
 	
-	//@Test
+	@Test
 	public void testUpdate() {
 		boolean result = true;
 		DBMComments dbManager =new DBMComments("localhost", "dbtest","comments");				
@@ -45,6 +62,8 @@ public class TestDBMComments {
 		
 		try {
 			dbManager.connect("root", "1234");
+			
+			dbManager.deleteAll();
 			dbManager.insert(coments1);
 			
 			coments1.setMyUser("Don Updata");
@@ -74,7 +93,7 @@ public class TestDBMComments {
 	}
 
 
-	//@Test
+	@Test
 	public void testGet(){
 		boolean result = true;
 		DBMComments dbManager =   new DBMComments("localhost", "dbTest", "comments"); 		
@@ -101,7 +120,7 @@ public class TestDBMComments {
 	
 	
 	
-	//@Test
+	@Test
 	public void testSelect() {
 		boolean result = true;
 		DBMComments dbManager =new DBMComments("localhost", "dbtest","comments");
@@ -127,8 +146,8 @@ public class TestDBMComments {
 			dbManager.insert(coments5);
 			
 			
-			results1 = dbManager.select("myuser", "LIKE","'user1%'");
-			results2 = dbManager.select("myuser", "=", "user1");
+			results1 = dbManager.select("myuser", "LIKE","'user%'");
+			results2 = dbManager.select("myuser", "=", "'user1'");
 			results3 = dbManager.select("id", "BETWEEN", "2 AND 5");
 		} catch (Exception e) {
 			result=false;
@@ -137,7 +156,7 @@ public class TestDBMComments {
 			dbManager.close(); 
 		}
 		
-		Assert.assertEquals(true, results1);
+		Assert.assertEquals(true, result);
 		Assert.assertEquals(4, results1.size());
 		Assert.assertEquals(2, results2.size());
 		Assert.assertEquals(4, results3.size());
@@ -149,10 +168,9 @@ public class TestDBMComments {
 	
 	
 	
-	// @Test
+	//@Test
 	public void testDelete() {
 		DBMComments dbManager =new DBMComments("localhost", "dbtest","comments");
-
 		try {
 			dbManager.connect("root", "1234");
 			dbManager.deleteAll();

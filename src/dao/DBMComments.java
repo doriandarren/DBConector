@@ -5,16 +5,30 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-
+import java.util.HashMap;
+import java.util.Map;
 
 import model.Comments;
 
 public class DBMComments extends DBManager<Comments>{
-
+	
+	
+	private static Map<Integer, String> map;
+	static{
+		map = new HashMap<Integer, String>();
+		map.put(1, "id");
+		map.put(2, "MYUSER");
+		map.put(3, "EMAIL");
+		map.put(4, "WEBPAGE");
+		map.put(5, "DATUM");
+		map.put(6, "SUMMARY");
+		map.put(7, "COMMENTS");
+	}
+	
+	
+	
 	public DBMComments(String dbHost, String dbName, String dbTable) {
-		super(dbHost, dbName, dbTable);
+		super(dbHost, dbName, dbTable);		
 	}
 
 	@Override
@@ -99,7 +113,7 @@ public class DBMComments extends DBManager<Comments>{
 		
 
 	@Override
-	protected Comments mapDbToObject(ResultSet resultSet2) throws SQLException {
+	protected Comments mapDbToObject(ResultSet resultSet) throws SQLException {
 		// lee el resultado i
 		int id = resultSet.getInt("id");
 		String user = resultSet.getString("myuser");
@@ -132,8 +146,6 @@ public class DBMComments extends DBManager<Comments>{
 			throw new RuntimeException("El objeto que trata de actualizar no tiene un id válido");
 		}		
 	}
-	
-	
 	
 	
 }
