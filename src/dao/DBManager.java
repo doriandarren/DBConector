@@ -8,12 +8,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import javax.naming.CommunicationException;
 
 import model.Comments;
+import model.Table;
 
-public abstract class DBManager<T> implements DBAccess<T>{
+public abstract class DBManager<T extends Table> implements DBAccess<T>{
 
 	private String dbName;
 	private final String dbTable;
@@ -98,62 +100,6 @@ public abstract class DBManager<T> implements DBAccess<T>{
 	
 	
 	
-	@Override
-	public T insert(T object) throws SQLException{
-		int lastInsertId = -1;
-		
-				
-		
-		String strSql = "INSERT INTO "+ getDbTable() + " values (default,?,?,?,?,?,?)";
-		
-		PreparedStatement preparedStatement =null;
-		
-		try {
-			preparedStatement = getConnected()
-					.prepareStatement(strSql, Statement.RETURN_GENERATED_KEYS);
-						
-			/*preparedStatement.setString(1, object.getMyUser());
-			preparedStatement.setString(2, object.getEmail());
-			preparedStatement.setString(3, object.getWebpage());
-			preparedStatement.setDate(4, object.getDatum());
-			preparedStatement.setString(5, object.getSummary());
-			preparedStatement.setString(6, object.getComments());*/
-			
-			preparedStatement.executeUpdate();
-			ResultSet rs = preparedStatement.getGeneratedKeys();
-			
-			if(rs.next()){
-				lastInsertId = rs.getInt(1);
-			}
-			
-			
-		} catch (SQLException e) {
-			throw e;
-		}finally{
-			try {
-				preparedStatement.close();
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
-		}		
-		//object.setId(lastInsertId);		
-		return object;	
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
-	@Override
-	public abstract void update(T object) throws SQLException;
-
 	@Override
 	public T select(int id) throws SQLException{		
 		String strSql = "SELECT * FROM "
@@ -242,10 +188,129 @@ public abstract class DBManager<T> implements DBAccess<T>{
 	}
 	
 	
-	protected abstract T mapDbToObject(ResultSet resultSet2) throws SQLException;
+	
+	
+	@Override
+	public int insert(T object) throws SQLException{
+		int lastInsertId = -1;
+		
+		HashMap<String, Object> mapColumn = mapObjectToDb(object);		
+		String strSQL = getAnSQLInsert(mapColumn);
+		
+				
+		try(PreparedStatement preparedStatement = getConnected()
+													.prepareStatement(strSQL, Statement.RETURN_GENERATED_KEYS)){
+			int i=1;
+			
+			for(String column : mapColumn.keySet())
+				preparedStatement.setObject(i++, mapColumn.get(column));
+			
+			preparedStatement.executeUpdate();
+			ResultSet rs = preparedStatement.getGeneratedKeys();
+			
+			if(rs.next()){
+				lastInsertId = rs.getInt(1);
+			}
+			
+			object.setId(lastInsertId);
+			
+		} catch (SQLException e) {
+			throw e;
+		}
+		
+		return lastInsertId;	
+	}
+		
+	/**
+	 * Metodo sobre escrito Va con el INSERT metodo: insert(T object)
+	 * @param object
+	 * @return
+	 */
+	protected abstract HashMap<String, Object> mapObjectToDb(T object);
+	
+	/**
+	 * Va con el INSERT metodo: insert(T object)
+	 * INSERT INTO getDbTable() (id, column2, column3, column4, column5, column6)
+	 * VALUES (default, ?, ?, ?, ?, ?);
+	 * 
+	 * 
+	 * @param mapObject
+	 * @return
+	 */
+	private String getAnSQLInsert(HashMap<String, Object> mapObject) {
+		StringBuilder strSQL = new StringBuilder("INSERT INTO " + getDbTable());
+		StringBuilder columns =  new StringBuilder(" (id, ");
+		StringBuilder values = new StringBuilder(" VALUES (default, ");
+		int index = 0;
+		int size= mapObject.keySet().size();
+		
+		
+		for(String column : mapObject.keySet()){
+			if(index++<size-1){
+				values.append(" ?, ");
+				columns.append(column + ", ");
+			}else{
+				values.append(" ?)");
+				columns.append(column + ")");
+			}
+		}
+		
+		strSQL.append(columns);
+		strSQL.append(values);
+		
+		
+		return strSQL.toString();
+	}
+	
+	
+	
+	@Override
+	public void update(T object) throws SQLException {
+		HashMap<String, Object> mapColumn = mapObjectToDb(object);
+		String strSQL = getAnSQLUpdate(mapColumn);
+		// try con algumentos cierra automaticamente al finalizar
+		try (PreparedStatement preparedStatement = getConnected().prepareStatement(strSQL)) {
+			int i = 1;
+			for (String column : mapColumn.keySet())
+				preparedStatement.setObject(i++, mapColumn.get(column));
 
+			preparedStatement.setInt(i, object.getId());
+			preparedStatement.executeUpdate();
+
+		} catch (SQLException e) {
+			throw e;
+		}
+	}
 	
 	
+	
+	/**
+	 *  " myuser=?, email=?, webpage = ?,datum=?, summary=?, comments=?  WHERE id=?"
+	 * @param mapObject
+	 * @return
+	 */
+	private String getAnSQLUpdate(HashMap<String, Object> mapObject) {
+		 StringBuilder strSQL = new StringBuilder("UPDATE "+ getDbTable() + " SET "); 
+		  
+		  int index =0;
+		  int size =  mapObject.keySet().size(); 
+		  for (String column : mapObject.keySet()) { 
+			  strSQL.append(column);
+			  if(index++<size-1)
+				  strSQL.append("=?, "); 
+			  else
+			      strSQL.append("=? "); 
+		   }
+		  
+		  strSQL.append(" WHERE id=? "); 
+		  
+		return strSQL.toString();	
+	}
+
+
+	protected abstract T mapDbToObject(ResultSet resultSet) throws SQLException;
+	
+		
 	
 	/**
 	 * Verifica el operador sea valido
@@ -259,12 +324,6 @@ public abstract class DBManager<T> implements DBAccess<T>{
 				+ " no hace parte de la tabla " + getDbTable());		
 	}
 	
-	
-
-	
-	
-		
-
 	@Override
 	public void close() {
 		try {

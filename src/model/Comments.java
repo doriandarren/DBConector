@@ -12,8 +12,8 @@ import java.util.Map;
  */
 
 
-public class Comments{
-	private int id;
+public class Comments extends Table{
+
 	private String MyUser;
 	private String email;
 	private String webpage;
@@ -23,7 +23,7 @@ public class Comments{
 	
 	
 	public Comments(){
-		id=-1;
+		setId(-1);
 	}
 	
 	public String getComments() {
@@ -32,12 +32,7 @@ public class Comments{
 	public void setComments(String comments) {
 		this.comments = comments;
 	}
-	public int getId() {
-		return id;
-	}
-	public void setId(int id) {
-		this.id = id;
-	}
+	
 	public String getMyUser() {
 		return MyUser;
 	}

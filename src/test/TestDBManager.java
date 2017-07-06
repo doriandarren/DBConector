@@ -3,10 +3,12 @@ package test;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.junit.Assert;
 
 import dao.DBManager;
+import model.Table;
 
 public class TestDBManager {
 
@@ -55,34 +57,20 @@ public class TestDBManager {
 			super("localhost", "dbtest", "comments");
 		}
 
+		
 		@Override
-		public Object insert(Object object) {
+		protected HashMap mapObjectToDb(Table object) {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
-		public void update(Object object) {
-			// TODO Auto-generated method stub
-		}
-
-		@Override
-		public Object select(int id) {
+		protected Table mapDbToObject(ResultSet resultSet) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
-		@Override
-		public ArrayList select(String column, String operator, String value) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		protected Object mapDbToObject(ResultSet resultSet2) throws SQLException {
-			// TODO Auto-generated method stub
-			return null;
-		}		
+			
 	}
 	
 }
